@@ -29,7 +29,9 @@
    (가능하면 스크린샷을 찍어 본다). `used_photos.json` 에 쓴 사진을 기록한다.
 6. 사용자에게 안내: 로컬에서 `python -m naver_blog login`(최초 1회) → `python -m naver_blog post --tab <탭>`
    → 네이버에서 임시저장 글 확인 → 태그·카테고리·장소 넣고 발행.
-7. `workspace/` 는 커밋하지 않는다(.gitignore). 코드·설정 변경만 커밋한다.
+7. 사용자 PC로 넘길 완성본은 `drafts/<탭>/` 에 복사해 커밋한다(post.json, post.txt, preview.html, photos.yaml,
+   photos/out/*.jpg, photos/review.jpg). 원본 사진(raw)과 `workspace/` 는 커밋하지 않는다.
+   `post` 명령은 workspace/<탭> 이 없으면 drafts/<탭> 을 쓴다.
 
 ## 셀렉터가 깨졌을 때
 `post` 가 "요소를 찾지 못함" 경고를 내면 `config/selectors.yaml` 만 고친다. 네이버 스마트에디터 ONE 화면에서

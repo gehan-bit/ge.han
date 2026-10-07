@@ -37,10 +37,22 @@ def slugify(tab: str) -> str:
     return re.sub(r"[\\/:*?\"<>|\s]+", "_", tab.strip()) or "post"
 
 
-def post_dir(settings: dict[str, Any], tab: str) -> Path:
+def post_dir(settings: dict[str, Any], tab: str, create: bool = True) -> Path:
+    """글 폴더. workspace/<탭> 이 기본. 없고 drafts/<탭>(저장소에 넣어 둔 완성본)이 있으면 그것을 쓴다."""
     d = ROOT / settings["paths"]["workspace"] / slugify(tab)
-    d.mkdir(parents=True, exist_ok=True)
+    alt = ROOT / "drafts" / slugify(tab)
+    if not d.exists() and alt.exists():
+        return alt
+    if create:
+        d.mkdir(parents=True, exist_ok=True)
     return d
+
+
+def resolve_photo_paths(post: Post, pdir: Path) -> None:
+    """post.json 의 사진 경로는 글 폴더 기준 상대 경로. 실행 시 절대 경로로 바꾼다."""
+    for b in post.image_blocks():
+        if b.path and not Path(b.path).is_absolute():
+            b.path = str((pdir / b.path).resolve())
 
 
 def doc_path(settings: dict[str, Any]) -> Path:
@@ -97,7 +109,7 @@ def assign_photos(post: Post, pdir: Path, settings: dict[str, Any]) -> list[str]
             post.blocks.insert(last + 1 + (k - len(slots)), Block(kind="image", slot=k))
         slots = post.image_blocks()
     for b, f in zip(slots, files):
-        b.path = str(f)
+        b.path = str(f.relative_to(pdir)).replace("\\", "/")  # 글 폴더 기준 상대 경로(폴더째 옮겨도 됨)
     if len(files) < len(slots):
         notes.append(f"사진 {len(slots)}장 필요, {len(files)}장 있음 → photos/raw 에 더 넣고 crop 을 다시 실행")
     return notes
@@ -142,7 +154,7 @@ def _build(a, s) -> tuple[Post, Path, list[str]]:
     (pdir / "post.txt").write_text(post.plain_text(), encoding="utf-8")
     from .render_html import render
 
-    render(post, pdir / "preview.html", issues)
+    render(post, pdir / "preview.html", issues, base_dir=pdir)
     return post, pdir, issues
 
 
@@ -264,6 +276,7 @@ def cmd_post(a, s):
     if not pj.exists():
         sys.exit(f"{pj} 가 없습니다. 먼저 build 를 실행하세요.")
     post = Post.load(pj)
+    resolve_photo_paths(post, pdir)
     missing = [b for b in post.image_blocks() if not b.path or not Path(b.path).exists()]
     if missing and not a.allow_missing_photos:
         sys.exit(f"사진 자리 {len(missing)}곳에 파일이 없습니다. crop → build 를 먼저 하거나 --allow-missing-photos 를 주세요.")

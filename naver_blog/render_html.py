@@ -74,12 +74,15 @@ def _block_html(b: Block, img_rel: dict[str, str]) -> str:
     return ""
 
 
-def render(post: Post, out_path: Path | str, lint_issues: list[str] | None = None) -> Path:
+def render(post: Post, out_path: Path | str, lint_issues: list[str] | None = None, base_dir: Path | str | None = None) -> Path:
     out_path = Path(out_path)
+    base = Path(base_dir) if base_dir else out_path.parent
     img_rel: dict[str, str] = {}
     for b in post.image_blocks():
         if b.path:
             p = Path(b.path)
+            if not p.is_absolute():
+                p = base / p
             try:
                 img_rel[b.path] = str(p.resolve().relative_to(out_path.parent.resolve()))
             except ValueError:

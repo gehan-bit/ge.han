@@ -1,0 +1,100 @@
+[
+  {
+    "src": "/home/user/ge.han/workspace/1주차/photos/raw/DSC00215 복사본.jpg",
+    "width": 2710,
+    "height": 3388,
+    "crop": [
+      0,
+      320,
+      2710,
+      2488
+    ],
+    "method": "face-third",
+    "faces": [
+      {
+        "x": 781,
+        "y": 839,
+        "w": 529,
+        "h": 648,
+        "kind": "face",
+        "conf": 0.9371187090873718
+      },
+      {
+        "x": 520,
+        "y": 1236,
+        "w": 252,
+        "h": 352,
+        "kind": "face",
+        "conf": 0.8657663464546204
+      }
+    ],
+    "protects": [],
+    "needs_review": false,
+    "notes": [],
+    "out": "/home/user/ge.han/workspace/1주차/photos/out/DSC00215 복사본.jpg"
+  },
+  {
+    "src": "/home/user/ge.han/workspace/1주차/photos/raw/DSC05423.jpg",
+    "width": 3968,
+    "height": 4960,
+    "crop": [
+      1,
+      1056,
+      3966,
+      4228
+    ],
+    "method": "face-third",
+    "faces": [
+      {
+        "x": 1777,
+        "y": 1710,
+        "w": 571,
+        "h": 817,
+        "kind": "face",
+        "conf": 0.9028232097625732
+      }
+    ],
+    "protects": [],
+    "needs_review": false,
+    "notes": [],
+    "out": "/home/user/ge.han/workspace/1주차/photos/out/DSC05423.jpg"
+  },
+  {
+    "src": "/home/user/ge.han/workspace/1주차/photos/raw/DSC05642.jpg",
+    "width": 4609,
+    "height": 5761,
+    "crop": [
+      2,
+      0,
+      4607,
+      3684
+    ],
+    "method": "face-fit",
+    "faces": [
+      {
+        "x": 2311,
+        "y": 1982,
+        "w": 807,
+        "h": 1568,
+        "kind": "face",
+        "conf": 0.8510802984237671
+      }
+    ],
+    "protects": [
+      {
+        "x": 921,
+        "y": 0,
+        "w": 1843,
+        "h": 1152,
+        "kind": "protect",
+        "conf": 1.0
+      }
+    ],
+    "needs_review": false,
+    "notes": [
+      "보호 영역 여유를 줄여 맞춤(bare)",
+      "얼굴·보호 영역을 담느라 기준점에서 벗어남"
+    ],
+    "out": "/home/user/ge.han/workspace/1주차/photos/out/DSC05642.jpg"
+  }
+]

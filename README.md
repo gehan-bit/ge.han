@@ -42,6 +42,21 @@ python -m playwright install chromium      # 네이버 입력용 브라우저
 
 클로드 코드 세션에서 작업할 때는 이 인증 없이 커넥터로 원고와 사진을 받아 `workspace/` 에 넣습니다(`CLAUDE.md` 참고).
 
+## 바로 올리기 (1주차는 준비되어 있음)
+
+`drafts/1주차/` 에 완성된 글(post.json)과 5:4로 다듬은 사진이 들어 있습니다. 내 PC에서:
+
+```bash
+git clone https://github.com/gehan-bit/ge.han.git && cd ge.han
+git checkout claude/naver-blog-automation-23c0ik
+pip install -r requirements.txt && python -m playwright install chromium
+python -m naver_blog login                        # 창이 열리면 네이버 로그인(한 번만)
+python -m naver_blog post --tab 1주차 --keep-open  # 입력 후 임시저장. 화면을 보면서 확인
+```
+
+네이버 글쓰기 → 임시저장 글을 열어 확인하고 카테고리·태그·장소를 넣어 발행합니다.
+자동 입력이 중간에 막히면 `drafts/1주차/post.txt` 를 붙여넣고 `drafts/1주차/photos/out/` 사진을 올려도 같은 결과입니다.
+
 ## 글 한 편 만들기
 
 ```bash
@@ -105,7 +120,8 @@ naver_blog/      파이프라인 코드 (gdoc 파서, naver_format 서식, crop 
 config/          settings.yaml(설정) · selectors.yaml(에디터 셀렉터) · photos.example.yaml
 models/          얼굴 검출 모델 (OpenCV YuNet, Apache-2.0)
 tests/           단위 테스트, 모의 에디터(tests/mock/editor.html)
-workspace/       작업물(원고 JSON, 사진, 미리보기) — git 에 올리지 않음
+workspace/       작업물(원고 JSON, 원본 사진, 미리보기) — git 에 올리지 않음
+drafts/          완성된 글(post.json + 가공 사진)을 PC로 넘기기 위해 커밋하는 폴더
 ```
 
 테스트: `python -m pytest -q tests`

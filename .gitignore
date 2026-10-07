@@ -1,5 +1,6 @@
 # 작업물(원고 JSON, 사진, 결과물)은 저장소에 넣지 않는다
 workspace/
+# drafts/ 는 완성된 글(post.json + 가공 사진)을 PC로 넘기기 위해 커밋한다
 .secrets/
 .naver-profile/
 __pycache__/

@@ -1,0 +1,7 @@
+order:
+  - "DSC05423.jpg"
+  - "DSC00215 복사본.jpg"
+  - "DSC05642.jpg"
+overrides:
+  "DSC05642.jpg":
+    protect: [[0.2, 0.0, 0.4, 0.2]]
