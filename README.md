@@ -42,9 +42,21 @@ python -m playwright install chromium      # 네이버 입력용 브라우저
 
 클로드 코드 세션에서 작업할 때는 이 인증 없이 커넥터로 원고와 사진을 받아 `workspace/` 에 넣습니다(`CLAUDE.md` 참고).
 
-## 바로 올리기 (1주차는 준비되어 있음)
+## 가장 쉬운 방법: 더블클릭으로 올리기
 
-`drafts/1주차/` 에 완성된 글(post.json)과 5:4로 다듬은 사진이 들어 있습니다. 내 PC에서:
+1. 이 저장소를 내려받아 압축을 풉니다: [ZIP 내려받기](https://github.com/gehan-bit/ge.han/archive/refs/heads/claude/naver-blog-automation-23c0ik.zip)
+2. 파이썬이 없으면 설치합니다: https://www.python.org/downloads/ (윈도우는 설치 첫 화면에서 **Add python.exe to PATH** 체크)
+3. 압축 푼 폴더에서 **맥은 `올리기.command`**, **윈도우는 `올리기.bat`** 를 더블클릭합니다.
+   - 처음 한 번은 필요한 프로그램을 설치합니다(몇 분).
+   - 네이버 로그인 창이 열리면 로그인합니다(한 번만, 다음부터는 건너뜀).
+   - 올릴 글 이름을 물으면 `1주차` 를 입력합니다. 글이 자동으로 입력되고 임시저장됩니다.
+4. 네이버 글쓰기에서 임시저장 글을 열어 확인하고, 카테고리·태그·장소를 넣어 발행합니다.
+
+맥에서 "확인되지 않은 개발자" 경고가 나오면 파일을 우클릭 → 열기를 누르면 됩니다.
+
+## 명령줄로 올리기
+
+`drafts/1주차/` 에 완성된 글(post.json)과 5:4로 다듬은 사진이 들어 있습니다. 터미널에서:
 
 ```bash
 git clone https://github.com/gehan-bit/ge.han.git && cd ge.han
