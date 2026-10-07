@@ -1,0 +1,78 @@
+# 네이버 스마트에디터 ONE 셀렉터. 네이버가 화면을 바꾸면 여기만 고치면 된다.
+# 각 항목은 후보를 쉼표 없이 줄 단위 목록으로 적는다. 앞에서부터 차례로 시도한다.
+editor_url: "https://blog.naver.com/{blog_id}/postwrite"
+login_url: "https://nid.naver.com/nidlogin.login"
+login_cookie: "NID_AUT"
+
+editor_root:
+  - ".se-main-container"
+title:
+  - ".se-documentTitle .se-text-paragraph"
+  - ".se-title-text .se-text-paragraph"
+body_paragraph:
+  - ".se-main-container .se-component.se-text .se-text-paragraph"
+popup_dismiss:          # 열자마자 뜨는 팝업(작성 중인 글 불러오기 → 취소, 도움말 닫기 등)
+  - ".se-popup-button-cancel"
+  - ".se-help-panel-close-button"
+  - "button.se-popup-close"
+  - "button:has-text('나중에 할게요')"
+
+align_button:
+  - ".se-toolbar-button-align"
+  - "button[data-name='align']"
+align_center_option:
+  - ".se-toolbar-option-align-center-button"
+  - "button[data-value='center']"
+font_size_button:
+  - ".se-font-size-code-toolbar-button"
+  - "button[data-name='font-size-code']"
+font_size_option: ".se-toolbar-option-font-size-code-{size}-button"   # {size} = fs15, fs19 …
+bold_button:
+  - ".se-bold-toolbar-button"
+  - "button[data-name='bold']"
+font_color_button:
+  - ".se-font-color-toolbar-button"
+  - ".se-toolbar-button-font-color"
+font_color_option: "[data-color='{color}']"    # 팔레트 항목. 색은 settings.note_color
+
+hr_button:
+  - ".se-horizontal-line-toolbar-button"
+  - "button[data-name='horizontal-line']"
+hr_option:
+  - ".se-toolbar-option-horizontal-line-line1-button"
+  - ".se-toolbar-option-horizontal-line-default-button"
+  - "[class*='se-toolbar-option-horizontal-line']"
+image_button:
+  - ".se-image-toolbar-button"
+  - "button[data-name='image']"
+image_component: ".se-main-container .se-component.se-image"
+quote_button:
+  - ".se-quotation-toolbar-button"
+quote_option:
+  - ".se-toolbar-option-quotation-quotation_line-button"
+  - "[class*='se-toolbar-option-quotation']"
+
+save_button:            # 임시저장
+  - "button[class*='save_btn']"
+  - "button:has-text('임시저장')"
+  - "button:text-matches('^\\s*저장')"
+save_done:              # 저장 완료 표시(토스트/카운트). 없어도 넘어간다
+  - ".se-toast"
+  - "[class*='save_count']"
+publish_button:         # 발행 레이어 열기(--publish 일 때만)
+  - "button[class*='publish_btn']"
+  - "button:has-text('발행')"
+publish_layer:
+  - "[class*='layer_publish']"
+  - "[class*='publish_layer']"
+tag_input:
+  - "input[class*='tag_input']"
+  - "#tag-input"
+  - "input[placeholder*='태그']"
+category_button:
+  - "button[class*='selectbox_button']"
+category_option: "label:has-text('{name}'), li:has-text('{name}')"
+public_radio: "label:has-text('전체공개'), input[value='all'] + label"
+publish_confirm:
+  - "[class*='layer_publish'] button:has-text('발행')"
+  - "button[class*='confirm_btn']:has-text('발행')"

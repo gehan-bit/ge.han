@@ -1,0 +1,345 @@
+{
+ "documentId": "x",
+ "title": "fixture",
+ "tabs": [
+  {
+   "tabProperties": {
+    "title": "샘플",
+    "tabId": "t.0"
+   },
+   "documentTab": {
+    "body": {
+     "content": [
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "[제목] 샘플 제목｜부제\n",
+           "textStyle": {
+            "foregroundColor": {
+             "color": {
+              "rgbColor": {
+               "red": 0.54,
+               "green": 0.54,
+               "blue": 0.54
+              }
+             }
+            },
+            "fontSize": {
+             "magnitude": 10,
+             "unit": "PT"
+            }
+           }
+          }
+         }
+        ]
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "[태그] #원더바레 #바레\n",
+           "textStyle": {
+            "foregroundColor": {
+             "color": {
+              "rgbColor": {
+               "red": 0.54,
+               "green": 0.54,
+               "blue": 0.54
+              }
+             }
+            },
+            "fontSize": {
+             "magnitude": 10,
+             "unit": "PT"
+            }
+           }
+          }
+         }
+        ]
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "\n",
+           "textStyle": {}
+          }
+         }
+        ]
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "“첫 문장입니다.”\n",
+           "textStyle": {
+            "bold": true
+           }
+          }
+         }
+        ]
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "둘째 줄이에요.\n",
+           "textStyle": {}
+          }
+         }
+        ]
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "\n",
+           "textStyle": {}
+          }
+         }
+        ]
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "inlineObjectElement": {
+           "inlineObjectId": "kix.a"
+          }
+         }
+        ]
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "\n",
+           "textStyle": {}
+          }
+         }
+        ]
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "1. 소제목 📱\n",
+           "textStyle": {
+            "bold": true
+           }
+          }
+         }
+        ],
+        "paragraphStyle": {
+         "namedStyleType": "HEADING_2"
+        }
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "본문 한 줄\n",
+           "textStyle": {}
+          }
+         }
+        ]
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "\n",
+           "textStyle": {}
+          }
+         }
+        ]
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "※ 주의 문구\n",
+           "textStyle": {
+            "foregroundColor": {
+             "color": {
+              "rgbColor": {
+               "red": 0.54,
+               "green": 0.54,
+               "blue": 0.54
+              }
+             }
+            },
+            "fontSize": {
+             "magnitude": 9,
+             "unit": "PT"
+            }
+           }
+          }
+         }
+        ]
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "\n",
+           "textStyle": {}
+          }
+         }
+        ]
+       }
+      },
+      {
+       "table": {
+        "rows": 2,
+        "columns": 2,
+        "tableRows": [
+         {
+          "tableCells": [
+           {
+            "content": [
+             {
+              "paragraph": {
+               "elements": [
+                {
+                 "textRun": {
+                  "content": "항목\n"
+                 }
+                }
+               ]
+              }
+             }
+            ]
+           },
+           {
+            "content": [
+             {
+              "paragraph": {
+               "elements": [
+                {
+                 "textRun": {
+                  "content": "내용\n"
+                 }
+                }
+               ]
+              }
+             }
+            ]
+           }
+          ]
+         },
+         {
+          "tableCells": [
+           {
+            "content": [
+             {
+              "paragraph": {
+               "elements": [
+                {
+                 "textRun": {
+                  "content": "가\n"
+                 }
+                }
+               ]
+              }
+             }
+            ]
+           },
+           {
+            "content": [
+             {
+              "paragraph": {
+               "elements": [
+                {
+                 "textRun": {
+                  "content": "나\n"
+                 }
+                }
+               ]
+              }
+             }
+            ]
+           }
+          ]
+         }
+        ]
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "\n",
+           "textStyle": {}
+          }
+         }
+        ]
+       }
+      },
+      {
+       "paragraph": {
+        "elements": [
+         {
+          "textRun": {
+           "content": "https://www.wonderbarrelicense.kr\n",
+           "textStyle": {
+            "link": {
+             "url": "https://www.wonderbarrelicense.kr"
+            }
+           }
+          }
+         }
+        ]
+       }
+      }
+     ]
+    },
+    "inlineObjects": {
+     "kix.a": {
+      "inlineObjectProperties": {
+       "embeddedObject": {
+        "size": {
+         "width": {
+          "magnitude": 400
+         },
+         "height": {
+          "magnitude": 320
+         }
+        },
+        "imageProperties": {
+         "contentUri": "https://example.com/i.png"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ ]
+}

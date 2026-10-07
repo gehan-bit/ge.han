@@ -1,0 +1,8 @@
+# 작업물(원고 JSON, 사진, 결과물)은 저장소에 넣지 않는다
+workspace/
+.secrets/
+.naver-profile/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store

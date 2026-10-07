@@ -1,0 +1,45 @@
+# 원더바레 네이버 블로그 자동화 설정
+blog:
+  id: "linda6408"              # 곤의 일상(blog.naver.com/linda6408). 공식 블로그를 쓰면 바꾼다
+  category: ""                 # 발행 시 고를 카테고리 이름(비우면 기본값)
+  public: true                 # 전체공개
+
+source:
+  doc_id: "1bmL5foind18EKd5DyOkK2eWb9rzmNacNwyfwr9_odsg"   # [고은] 원더바레 오카방 포스팅
+  drive_folder_id: "11_t6Pn9c1UelgVS_xXet4fdzxt0y6EE1"     # 원더바레 아카이브(사진)
+  guideline_url: "https://claude.ai/artifact/8Ew8N8tTFfkmKcQ5QroT25"
+
+format:
+  max_line: 30                 # 한 줄 약 25~30자
+  min_line: 16
+  wrap: true                   # false면 원고 줄바꿈 그대로
+  hr_before_heading: true      # 소제목 앞 구분선
+  heading_size: "fs19"         # 소제목 글자 크기(본문보다 크게, 굵게)
+  body_size: "fs15"            # 에디터 기본
+  note_size: "fs13"            # ※ 문구
+  note_color: "#777777"        # ※ 문구 회색
+  min_tags: 10
+  max_tags: 15
+  extra_tags: ["바레클래스", "바레운동", "필라테스", "요가"]   # 태그가 10개 미만일 때 뒤에 채움
+  closing_lines:               # 공감·댓글을 청하는 한 줄(비우면 생략)
+    - "도움이 되셨다면 공감과 댓글로 알려주세요."
+  footer_links:                # 맨 아래 공식 채널(링크 카드). 아카데미 글은 아카데미 사이트
+    - "https://www.instagram.com/wonder_barre/"
+    - "https://www.wonderbarre.kr/"
+  footer_links_academy:
+    - "https://www.instagram.com/wonder_barre/"
+    - "https://www.wonderbarrelicense.kr/"
+  academy_keywords: ["아카데미", "강사", "교육", "채용", "큐잉", "수업"]   # 제목에 있으면 아카데미 링크 세트 사용
+
+photos:
+  per_post: null               # null이면 원고의 사진 자리 수만큼. 숫자를 주면 그만큼(부족하면 뒤에 추가)
+  max_width: 1600
+  jpeg_quality: 90
+  anchor: "third"              # 얼굴 기준점: third(위에서 1/3) | center
+  prefer_folders: []           # 예: ["마곡점"] 특정 지점 사진 우선
+  exclude_folders: []
+
+paths:
+  workspace: "workspace"
+  secrets: ".secrets"
+  browser_profile: ".naver-profile"

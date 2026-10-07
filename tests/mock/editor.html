@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>mock smarteditor</title>
+<style>
+body{font-family:sans-serif;margin:0}
+.toolbar{position:sticky;top:0;background:#eee;padding:6px;display:flex;gap:6px;flex-wrap:wrap}
+.toolbar button{padding:4px 8px}
+.opt{display:none;gap:4px}.opt.open{display:flex}
+.se-main-container{max-width:800px;margin:20px auto;border:1px solid #ccc;padding:20px}
+.se-text-paragraph{min-height:1.4em;outline:none;border-bottom:1px dashed #eee}
+.se-popup-alert{position:fixed;inset:30% 30%;background:#fff;border:2px solid #333;padding:20px}
+.se-toast{position:fixed;bottom:20px;left:20px;background:#333;color:#fff;padding:8px}
+.se-component.se-image img{max-width:300px;display:block}
+header{display:flex;justify-content:flex-end;gap:8px;padding:8px;background:#ddd}
+</style></head>
+<body>
+<header><button class="save_btn__abc">저장 <span class="save_count__x">0</span></button><button class="publish_btn__abc">발행</button></header>
+<div class="toolbar">
+  <button class="se-toolbar-button-align" onclick="toggle('align')">정렬</button>
+  <div id="align" class="opt"><button class="se-toolbar-option-align-left-button" onclick="align('left')">왼쪽</button><button class="se-toolbar-option-align-center-button" onclick="align('center')">가운데</button></div>
+  <button class="se-font-size-code-toolbar-button" onclick="toggle('size')">크기</button>
+  <div id="size" class="opt"><button class="se-toolbar-option-font-size-code-fs13-button" onclick="size('fs13')">13</button><button class="se-toolbar-option-font-size-code-fs15-button" onclick="size('fs15')">15</button><button class="se-toolbar-option-font-size-code-fs19-button" onclick="size('fs19')">19</button></div>
+  <button class="se-font-color-toolbar-button" onclick="toggle('color')">색</button>
+  <div id="color" class="opt"><button data-color="#777777" onclick="color('#777777')">회색</button><button data-color="#000000" onclick="color('#000000')">검정</button></div>
+  <button class="se-horizontal-line-toolbar-button" onclick="toggle('hr')">구분선</button>
+  <div id="hr" class="opt"><button class="se-toolbar-option-horizontal-line-line1-button" onclick="hr()">선1</button></div>
+  <button class="se-image-toolbar-button" onclick="document.getElementById('file').click()">사진</button>
+  <input id="file" type="file" accept="image/*" style="display:none" onchange="addImage(this)">
+</div>
+<div class="se-main-container">
+  <div class="se-documentTitle"><div class="se-text-paragraph" contenteditable="true" data-placeholder="제목"></div></div>
+  <div class="se-component se-text"><div class="se-text-paragraph" contenteditable="true"></div></div>
+</div>
+<div class="se-popup-alert"><p>작성 중인 글이 있습니다. 불러올까요?</p><button class="se-popup-button-cancel" onclick="this.parentNode.remove()">취소</button><button class="se-popup-button-confirm">확인</button></div>
+<script>
+window.__log=[];
+function toggle(id){document.querySelectorAll('.opt').forEach(o=>{if(o.id!==id)o.classList.remove('open')});document.getElementById(id).classList.toggle('open');}
+function align(v){window.__log.push('align:'+v);document.execCommand('justify'+(v==='center'?'Center':'Left'));toggle('align');}
+function size(v){window.__log.push('size:'+v);toggle('size');document.execCommand('fontSize',false,{fs13:'2',fs15:'3',fs19:'5'}[v]);}
+function color(v){window.__log.push('color:'+v);toggle('color');document.execCommand('foreColor',false,v);}
+function body(){const ps=document.querySelectorAll('.se-component.se-text .se-text-paragraph');return ps[ps.length-1];}
+function hr(){toggle('hr');window.__log.push('hr');const c=document.querySelector('.se-main-container');const h=document.createElement('div');h.className='se-component se-horizontalLine';h.innerHTML='<hr>';c.appendChild(h);newText();}
+function newText(){const c=document.querySelector('.se-main-container');const d=document.createElement('div');d.className='se-component se-text';d.innerHTML='<div class="se-text-paragraph" contenteditable="true"></div>';c.appendChild(d);}
+function addImage(inp){const f=inp.files[0];if(!f)return;window.__log.push('image:'+f.name);const c=document.querySelector('.se-main-container');const d=document.createElement('div');d.className='se-component se-image';const img=document.createElement('img');img.src=URL.createObjectURL(f);d.appendChild(img);
+  setTimeout(()=>{c.appendChild(d);newText();},700);inp.value='';}
+document.querySelector('.save_btn__abc').onclick=()=>{const t=document.querySelector('.se-documentTitle .se-text-paragraph').innerText;const html=document.querySelector('.se-main-container').innerHTML;window.__saved={title:t,html:html,text:document.querySelector('.se-main-container').innerText};const toast=document.createElement('div');toast.className='se-toast';toast.textContent='임시저장 완료';document.body.appendChild(toast);document.querySelector('.save_count__x').textContent='1';};
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key.toLowerCase()==='b'){e.preventDefault();document.execCommand('bold');window.__log.push('bold');}});
+</script></body></html>
