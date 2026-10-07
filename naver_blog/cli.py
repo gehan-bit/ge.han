@@ -274,7 +274,8 @@ def cmd_post(a, s):
     pdir = post_dir(s, a.tab)
     pj = pdir / "post.json"
     if not pj.exists():
-        sys.exit(f"{pj} 가 없습니다. 먼저 build 를 실행하세요.")
+        avail = sorted(d.name for base in (ROOT / "drafts", ROOT / s["paths"]["workspace"]) if base.exists() for d in base.iterdir() if (d / "post.json").exists())
+        sys.exit(f"'{a.tab}' 글이 없습니다. 올릴 수 있는 글: {', '.join(avail) or '(없음)'}  (새 글은 build 로 만듭니다)")
     post = Post.load(pj)
     resolve_photo_paths(post, pdir)
     missing = [b for b in post.image_blocks() if not b.path or not Path(b.path).exists()]

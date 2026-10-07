@@ -17,7 +17,20 @@ if [ ! -d ".naver-profile" ]; then
   python3 -m naver_blog login || { read -p "엔터를 누르면 닫힙니다." _; exit 1; }
 fi
 echo
-echo "올릴 글 폴더:"; ls drafts
-read -p "[3/3] 올릴 글 이름을 입력하세요 (예: 1주차): " TAB
-python3 -m naver_blog post --tab "${TAB:-1주차}" --keep-open
+# 글은 번호로 고른다(터미널 한글 입력 오류를 피하기 위해)
+POSTS=()
+for d in drafts/*/ workspace/*/; do
+  [ -f "$d/post.json" ] && POSTS+=("$(basename "$d")")
+done
+if [ ${#POSTS[@]} -eq 0 ]; then
+  echo "올릴 글이 없습니다 (drafts 폴더가 비어 있음)."; read -p "엔터를 누르면 닫힙니다." _; exit 1
+fi
+echo "[3/3] 올릴 글을 번호로 고르세요:"
+i=1; for p in "${POSTS[@]}"; do echo "  $i) $p"; i=$((i+1)); done
+read -p "번호 입력 (그냥 엔터 = 1): " NUM
+NUM=${NUM:-1}
+TAB="${POSTS[$((NUM-1))]}"
+if [ -z "$TAB" ]; then echo "잘못된 번호입니다."; read -p "엔터를 누르면 닫힙니다." _; exit 1; fi
+echo "→ '$TAB' 을(를) 올립니다. 브라우저를 건드리지 말고 기다려 주세요."
+python3 -m naver_blog post --tab "$TAB" --keep-open
 read -p "끝났습니다. 엔터를 누르면 닫힙니다." _

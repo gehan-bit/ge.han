@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 chcp 65001 >nul
 cd /d "%~dp0"
 echo === 원더바레 네이버 블로그 올리기 ===
@@ -19,10 +20,20 @@ if not exist ".naver-profile" (
   %PY% -m naver_blog login || (pause & exit /b 1)
 )
 echo.
-echo 올릴 글 폴더:
-dir /b drafts
-set /p TAB=[3/3] 올릴 글 이름을 입력하세요 (예: 1주차): 
-if "%TAB%"=="" set TAB=1주차
+echo [3/3] 올릴 글을 번호로 고르세요:
+set N=0
+for /d %%D in (drafts\*) do (
+  if exist "%%D\post.json" (
+    set /a N+=1
+    call set "POST!N!=%%~nxD"
+    call echo   !N!^) %%~nxD
+  )
+)
+set /p NUM=번호 입력 (그냥 엔터 = 1): 
+if "%NUM%"=="" set NUM=1
+call set "TAB=%%POST%NUM%%%"
+if "%TAB%"=="" (echo 잘못된 번호입니다. & pause & exit /b 1)
+echo → "%TAB%" 을(를) 올립니다. 브라우저를 건드리지 말고 기다려 주세요.
 %PY% -m naver_blog post --tab "%TAB%" --keep-open
 echo 끝났습니다.
 pause
