@@ -5,3 +5,4 @@ pyyaml>=6
 playwright>=1.45
 google-api-python-client>=2.100
 google-auth-oauthlib>=1.2
+openpyxl>=3.1

@@ -8,3 +8,5 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 .설치완료
+# 오가닉 점검 결과(엑셀·HTML·스크린샷)
+output/

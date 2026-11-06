@@ -1,0 +1,150 @@
+# 네이버 모바일 검색 셀렉터 모음. 네이버 화면이 바뀌면 이 파일만 고친다.
+# 목록 항목은 후보를 위에서부터 차례로 시도하고, 처음 맞는(요소가 있는) 것을 쓴다.
+# 못 찾으면 빈칸으로 두고 로그(log.txt)에 "셀렉터 없음: <키>" 로 남긴다.
+
+blocked:                      # 캡챠·차단 화면 판별. URL 조각 또는 본문 문구. 하나라도 맞으면 즉시 멈춘다
+  url_contains: ["captcha", "nidlogin", "/block", "abuse"]
+  text_contains: ["자동입력 방지", "보안 확인", "비정상적인 접근", "접근이 제한", "서비스 이용에 제한", "로봇이 아닙니다", "captcha"]
+
+search_input:                 # 검색창(자동완성용)
+  - "#query"
+  - "input[name='query']"
+  - "input.sch_input"
+autocomplete_item:            # 자동완성 항목 텍스트
+  - ".atcmp_list li .kwd"
+  - ".atcmp_list li a"
+  - "[class*='atcmp'] li a"
+  - "ul.lst_atcmp li"
+  - "[class*='auto'] li[role='option']"
+
+related_keyword:              # 연관검색어 항목
+  - ".related_srch .lst_related_srch li a"
+  - ".lst_related_srch li a"
+  - "[class*='related_srch'] li a"
+  - ".sp_keyword .keyword a"
+  - "section[class*='related'] li a"
+
+# 검색 결과 블록(위에서부터 순서대로). 한 블록 = 섹션 하나
+result_root:
+  - "#ct .main_pack"
+  - ".main_pack"
+  - "#ct"
+block:
+  - ".main_pack > section"
+  - ".main_pack > div[class*='sc_']"
+  - ".main_pack > div.api_subject_bx"
+  - "#ct section"
+block_title:                  # 블록 제목(섹션 안에서)
+  - ".api_title_area .api_title"
+  - ".api_title"
+  - ".fds-comps-header-headline"
+  - "[class*='header-headline']"
+  - ".tit_area .tit"
+  - "h2"
+  - "h3"
+  - "strong.tit"
+block_ad_marker:              # 블록 안에 이 요소가 있으면 광고 블록
+  - ".link_ad"
+  - ".ad_label"
+  - "[class*='power_link']"
+  - "[class*='ad_area']"
+block_type_by_class:          # 섹션 class 조각 → 블록 종류 이름(앞에서부터 처음 맞는 것)
+  - ["sp_nmap", "플레이스"]
+  - ["sp_place", "플레이스"]
+  - ["sp_local", "플레이스"]
+  - ["sp_power", "광고(파워링크)"]
+  - ["power_link", "광고(파워링크)"]
+  - ["sp_ad", "광고"]
+  - ["sp_nreview", "블로그/리뷰"]
+  - ["sp_blog", "블로그"]
+  - ["sp_cafe", "카페"]
+  - ["sp_influencer", "인플루언서"]
+  - ["sp_keyword", "연관검색어"]
+  - ["sp_nvideo", "동영상"]
+  - ["sp_video", "동영상"]
+  - ["sp_image", "이미지"]
+  - ["sp_nnews", "뉴스"]
+  - ["sp_news", "뉴스"]
+  - ["sp_kin", "지식iN"]
+  - ["sp_nsite", "웹사이트"]
+  - ["sp_web", "웹사이트"]
+  - ["sp_shop", "쇼핑"]
+  - ["sp_nshop", "쇼핑"]
+  - ["sp_intent", "스마트블록"]
+  - ["sp_ugc", "스마트블록"]
+  - ["api_subject_bx", "스마트블록"]
+block_type_by_title:          # 블록 제목 조각 → 종류(class 로 못 정했을 때)
+  - ["파워링크", "광고(파워링크)"]
+  - ["플레이스", "플레이스"]
+  - ["블로그", "블로그"]
+  - ["인플루언서", "인플루언서"]
+  - ["연관검색어", "연관검색어"]
+  - ["함께 많이 찾는", "연관검색어"]
+  - ["카페", "카페"]
+  - ["동영상", "동영상"]
+  - ["뉴스", "뉴스"]
+  - ["지식iN", "지식iN"]
+  - ["이미지", "이미지"]
+block_keyword_item:           # 스마트블록 안의 키워드 칩(이걸로 키워드 후보를 더 모은다)
+  - ".fds-keyword-chip a"
+  - "[class*='keyword-chip'] a"
+  - "[class*='keyword_chip'] a"
+  - ".sp_keyword .keyword a"
+  - ".lst_related_srch li a"
+  - "a[class*='chip']"
+blog_item_title:              # 블로그 글 제목(블록이 블로그 성격인지 판단에만 씀; 1단계에서 확장)
+  - ".title_link"
+  - ".api_txt_lines.total_tit"
+  - "a[class*='title']"
+
+# 플레이스(검색 화면 안 목록)
+place_section:                # 플레이스 블록 자체(위 block 과 별개로 직접 찾는다)
+  - "section.sp_nmap"
+  - "section[class*='sp_place']"
+  - "section[class*='sp_local']"
+  - "div[class*='place']"
+place_item:                   # 업체 한 곳
+  - "li.place_unit"
+  - "li[class*='place_unit']"
+  - "li[class*='item_place']"
+  - "ul[class*='place'] > li"
+  - "li[class*='item']"
+place_item_name:
+  - ".place_bluelink"
+  - "span.place_bluelink"
+  - ".name"
+  - "strong.tit"
+  - "a[class*='name']"
+  - "strong"
+place_item_ad:                # 항목 안에 있으면 광고 업체
+  - ".ad_marker"
+  - "[class*='ad_marker']"
+  - "span:has-text('광고')"
+  - "[class*='ad']:visible"
+place_more_link:              # '더보기' (플레이스 목록 페이지로 감)
+  - "a:has-text('더보기')"
+  - ".btn_more"
+  - "a[class*='more']"
+
+# 플레이스 목록 페이지(더보기 누른 뒤. m.place.naver.com 등)
+place_list_item:
+  - "li.place_unit"
+  - "li[class*='place_unit']"
+  - "ul > li[class*='item']"
+  - "li[data-id]"
+  - "ul[class*='list'] > li"
+place_list_name:
+  - ".place_bluelink"
+  - "span.place_bluelink"
+  - ".name"
+  - "strong.tit"
+  - "a[class*='name']"
+  - "span[class*='name']"
+  - "strong"
+place_list_ad:
+  - ".ad_marker"
+  - "[class*='ad_marker']"
+  - "span:has-text('광고')"
+place_list_more_button:       # 목록 페이지에서 더 불러오기(있으면 누른다)
+  - "a:has-text('더보기')"
+  - "button:has-text('더보기')"

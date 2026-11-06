@@ -40,3 +40,9 @@
 ## 테스트
 `python -m pytest -q tests` (파서·줄바꿈·크롭 계산). 포스터는 `tests/mock/editor.html` 로 동작 확인:
 `python -m naver_blog post --tab <탭> --headless --editor-url file://$PWD/tests/mock/editor.html`
+
+## 네이버 오가닉 점검 도구(`naver_organic`)
+- 설정은 `config/organic.yaml` 하나, 셀렉터는 `config/organic_selectors.yaml` 하나에 모은다. 단계가 늘어도 이 두 파일을 같이 쓴다.
+- 클라우드 세션은 네이버에 접속이 안 될 수 있다. 그때는 `tests/mock/organic` 모의 화면으로 파이프라인만 확인하고,
+  실제 수집은 사용자 PC에서 `python -m naver_organic discover --test` 로 안내한다.
+- 셀렉터가 깨지면 `output/organic/<날짜>/pages/*.html` 을 열어 class 를 확인하고 후보 맨 앞에 추가한다. 코드 수정은 마지막 수단.

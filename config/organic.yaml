@@ -1,0 +1,60 @@
+# 네이버 오가닉 점검 설정. 0단계(키워드·경쟁사 발굴)부터 이후 단계까지 같이 쓴다.
+# 셀렉터는 config/organic_selectors.yaml 에 따로 있다.
+
+brand:
+  name: "어반필드 역삼점"
+  aliases: ["어반필드", "urbanfield", "urban field"]     # 플레이스 업체명에 이 중 하나가 들어 있으면 "우리 지점"
+
+seed_keywords:
+  - "역삼 헬스장"
+  - "역삼역 헬스장"
+  - "역삼역 PT"
+  - "강남역 헬스장"
+  - "강남역 PT"
+  - "어반필드 역삼"
+
+test_keywords:             # --test 로 돌릴 때만 쓰는 씨앗(처음 확인용)
+  - "역삼 헬스장"
+  - "강남역 PT"
+
+competitor_candidates:     # 구글 지도에서 찾은 후보. aliases 중 하나가 업체명에 들어 있으면 일치로 본다
+  - name: "소울업짐 역삼점"
+    aliases: ["소울업짐", "소울업"]
+  - name: "에이블짐 강남역점"
+    aliases: ["에이블짐", "able gym", "에이블 짐"]
+  - name: "헬스보이짐 강남역점"
+    aliases: ["헬스보이짐", "헬스보이"]
+  - name: "Exxl 피트니스"
+    aliases: ["exxl", "엑셀피트니스", "엑셀 피트니스"]
+  - name: "짐박스 강남2호점"
+    aliases: ["짐박스", "gymbox", "gym box"]
+  - name: "F45 역삼"
+    aliases: ["f45"]
+  - name: "하이록스 강남점"
+    aliases: ["하이록스", "hyrox"]
+  - name: "저스트짐"
+    aliases: ["저스트짐", "just gym", "저스트 짐"]
+  - name: "알파짐 강남역PT"
+    aliases: ["알파짐", "alpha gym"]
+
+crawl:
+  search_url: "https://m.search.naver.com/search.naver?query={query}"
+  home_url: "https://m.search.naver.com/"          # 자동완성은 여기 검색창에 입력해서 읽는다
+  autocomplete_api: "https://ac.search.naver.com/nx/ac?q={query}&st=100&frm=nv&r_format=json&r_enc=UTF-8&r_unicode=0&t_koreng=1&ans=2&run=2&rev=4&q_enc=UTF-8"
+  wait_min_sec: 3            # 요청 사이 랜덤 대기(초)
+  wait_max_sec: 5
+  page_timeout_ms: 30000
+  place_top_n: 10            # 플레이스 '더보기'로 상위 몇 곳까지
+  place_more: true           # false 면 검색 화면에 보이는 플레이스 목록만
+  headless: false            # 화면이 보이게. --headless 로 바꿀 수 있다
+  device: "Galaxy S9+"       # Playwright 기기 프로필(모바일 화면·UA). 없으면 아래 viewport/user_agent 사용
+  viewport: {width: 412, height: 915}
+  user_agent: "Mozilla/5.0 (Linux; Android 13; SM-G991N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"
+  locale: "ko-KR"
+  timezone: "Asia/Seoul"
+  # 위치 권한은 주지 않는다(permissions 비움). 매번 같은 조건이 되도록 쿠키도 매번 새로 시작한다.
+  save_html: true            # 키워드별 HTML·스크린샷을 output 폴더에 남긴다(셀렉터 고칠 때 씀)
+
+output:
+  dir: "output/organic"      # 날짜별 폴더가 그 아래 생긴다
+  excel_name: "네이버_키워드경쟁사_발굴_{date}.xlsx"
