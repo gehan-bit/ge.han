@@ -111,9 +111,10 @@ def write_excel(cfg: Config, results: list[KeywordResult], path: Path, log_lines
     for r in results:
         for b in r.blocks:
             rows.append([date, r.seed, b.order, b.kind, b.title, "광고" if b.is_ad else "", b.item_count,
-                         ", ".join(b.keywords), b.css_class])
-    _sheet(wb, "검색화면 구조", ["수집일", "씨앗 키워드", "순서", "블록 종류", "블록 제목", "광고", "링크 수",
-                            "블록 안 키워드", "class(디버그)"], rows, [12, 16, 6, 16, 36, 6, 8, 50, 40])
+                         " | ".join(b.names), ", ".join(b.keywords), b.css_class])
+    _sheet(wb, "검색화면 구조", ["수집일", "씨앗 키워드", "순서", "블록 종류", "블록 제목", "광고", "항목 수",
+                            "항목(업체·블로거 등, 상위)", "블록 안 키워드", "id/class(디버그)"],
+           rows, [12, 16, 6, 20, 24, 6, 8, 60, 30, 40])
 
     # 3) 플레이스 순위
     rows, fills = [], []

@@ -1,0 +1,12 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>네이버 플레이스</title></head><body><div id="app-root">
+<ul id="list">
+<li><a href="/place/1?x"><span>광고헬스 역삼</span><span>헬스장</span></a><span class="place_blind">광고</span></li>
+<li><a href="/place/2?x"><span>소울업짐 역삼점</span></a></li>
+<li><a href="/place/3?x"><span>어반필드 역삼점</span></a></li>
+<li><a href="/place/4?x"><span>짐박스 강남2호점</span></a></li>
+<li><a href="/place/5?x"><span>에이블짐 강남역점</span></a></li>
+<li><a href="/place/6?x"><span>F45 역삼</span></a></li>
+<li><a href="/place/7?x"><span>바디스페이스 역삼</span></a></li>
+</ul>
+<script>let added=false;window.addEventListener('wheel',()=>{if(added)return;added=true;const ul=document.getElementById('list');for(const n of ['헬스보이짐 강남역점','저스트짐 역삼','하이록스 강남점','어반핏 강남']){const li=document.createElement('li');li.innerHTML='<a href="/place/9?x"><span>'+n+'</span></a>';ul.appendChild(li);}});</script>
+</div></body></html>

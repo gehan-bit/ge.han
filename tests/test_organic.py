@@ -29,9 +29,10 @@ def test_real_config_loads():
     cfg = load_config()
     assert cfg.brand.name and cfg.seed_keywords and cfg.test_keywords
     S = load_selectors()
-    for key in ["search_input", "autocomplete_item", "related_keyword", "block", "block_title",
-                "place_item", "place_item_name", "place_list_item", "place_list_name", "blocked"]:
+    for key in ["search_input", "autocomplete_item", "related_keyword", "result_container", "block_rules",
+                "place_root", "place_item", "place_name_anchor", "place_list_root", "place_list_item", "blocked"]:
         assert key in S, key
+    assert any(r.get("self") == "#place-app-root" for r in S["block_rules"])
 
 
 def _results():

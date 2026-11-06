@@ -1,150 +1,105 @@
-# 네이버 모바일 검색 셀렉터 모음. 네이버 화면이 바뀌면 이 파일만 고친다.
+# 네이버 모바일 검색 셀렉터 모음. 네이버 화면이 바뀌면 이 파일만 고친다. (2026-11 실제 화면 기준)
 # 목록 항목은 후보를 위에서부터 차례로 시도하고, 처음 맞는(요소가 있는) 것을 쓴다.
 # 못 찾으면 빈칸으로 두고 로그(log.txt)에 "셀렉터 없음: <키>" 로 남긴다.
+# 네이버 모바일은 class 가 해시(예: XCvzh)라 자주 바뀌므로, id·data 속성·href 패턴처럼 안정적인 것만 쓴다.
 
 blocked:                      # 캡챠·차단 화면 판별. URL 조각 또는 본문 문구. 하나라도 맞으면 즉시 멈춘다
   url_contains: ["captcha", "nidlogin", "/block", "abuse"]
   text_contains: ["자동입력 방지", "보안 확인", "비정상적인 접근", "접근이 제한", "서비스 이용에 제한", "로봇이 아닙니다", "captcha"]
 
-search_input:                 # 검색창(자동완성용)
+# ---------- 자동완성 ----------
+# 1순위: 검색창이 쓰는 자동완성 API(config/organic.yaml 의 autocomplete_api). 2순위: 검색 결과 화면의 검색창에 입력해 레이어를 읽는다.
+search_input:
+  - "#nx_query"
+  - "input[name='query'][type='search']"
   - "#query"
-  - "input[name='query']"
-  - "input.sch_input"
-autocomplete_item:            # 자동완성 항목 텍스트
-  - ".atcmp_list li .kwd"
-  - ".atcmp_list li a"
-  - "[class*='atcmp'] li a"
-  - "ul.lst_atcmp li"
-  - "[class*='auto'] li[role='option']"
+autocomplete_item:            # 자동완성 레이어 항목
+  - "#sb-ac-recomm-wrap li"
+  - "#sb-ac li"
+  - ".u_atcp li"
+  - "[class*='atcp'] li"
 
-related_keyword:              # 연관검색어 항목
+# ---------- 연관검색어 ----------
+# 2026-11 현재 모바일 통합검색에는 연관검색어 블록이 없다(자동완성·관련질문·스마트블록으로 대체). 생기면 여기에 추가.
+related_keyword:
   - ".related_srch .lst_related_srch li a"
   - ".lst_related_srch li a"
   - "[class*='related_srch'] li a"
-  - ".sp_keyword .keyword a"
-  - "section[class*='related'] li a"
+  - "#ct [data-block-id*='related-keyword'] a"
+  - "#ct [data-block-id*='keyword'] a"
 
-# 검색 결과 블록(위에서부터 순서대로). 한 블록 = 섹션 하나
-result_root:
-  - "#ct .main_pack"
-  - ".main_pack"
+# ---------- 검색 결과 블록 ----------
+result_container:             # 이 요소의 직계 자식 하나 = 블록 하나(위에서 아래 순서)
   - "#ct"
-block:
-  - ".main_pack > section"
-  - ".main_pack > div[class*='sc_']"
-  - ".main_pack > div.api_subject_bx"
-  - "#ct section"
-block_title:                  # 블록 제목(섹션 안에서)
-  - ".api_title_area .api_title"
-  - ".api_title"
-  - ".fds-comps-header-headline"
-  - "[class*='header-headline']"
-  - ".tit_area .tit"
-  - "h2"
-  - "h3"
-  - "strong.tit"
+  - ".main_pack"
+block_skip_tags: ["SCRIPT", "LINK", "STYLE", "NOSCRIPT"]
+# 블록 규칙. 위에서부터 처음 맞는 규칙으로 종류·제목을 정한다.
+#  self: 블록 요소 자체가 맞아야 하는 셀렉터 / has: 블록 안에 있어야 하는 셀렉터
+#  title: 제목 요소 / title_fixed: 고정 제목 / kind: 종류 / kind_attr+kind_map: 속성 값으로 종류 / kind_by_title: 제목 조각→종류
+#  item: 블록 안 항목 / item_name: 항목 이름 요소(첫 글자 있는 것) / chips: 이 블록에서 키워드로 읽을 요소
+#  ad: true 면 광고 블록 / merge: 연속되면 한 블록으로 합침 / skip: 무시
+block_rules:
+  - self: "#place-app-root"
+    kind: "플레이스"
+    title: ".place_section_header_title"
+    kind_by_title: [["프로그램", "플레이스(프로그램 안내)"]]
+    item: "li"
+    item_name: "a:not(.place_thumb) span"
+  - has: "[id^='mobilePowerLink'], [class*='mobilePowerLink']"
+    kind: "광고(파워링크)"
+    title_fixed: "파워링크"
+    ad: true
+    item: "li"
+    item_name: ".tit_area .tit, .tit, a"
+    chips: ".type_keyword .etc_item"      # 광고주가 등록한 키워드 → 키워드 후보 출처 "광고(파워링크)"
+  - self: "div[id^='fdr-']"
+    kind_attr: "data-meta-ssuid"
+    kind_map: {fuq: "관련질문(AI)", review: "스마트블록(브랜드 콘텐츠)", image: "이미지", clip: "클립", video: "동영상",
+               news: "뉴스", kin: "지식iN", web: "웹사이트", shopping: "쇼핑", keyword: "연관검색어", related: "연관검색어"}
+    kind_default: "스마트블록"
+    title: "h2, h3"
+    item: ".api_subject_bx"
+    item_name: "a"
+  - self: ".spw_fsolid"
+    kind: "글 피드(블로그·카페)"
+    title_fixed: "글 피드"
+    merge: true
+    item: ".api_subject_bx"
+    item_name: "a"
+  - self: ".sp_page"
+    skip: true
+  - self: "section, div"       # 그 밖의 것(제목이 있으면 블록으로 남긴다)
+    kind: "기타"
+    title: "h2, h3, .api_title, [class*='title']"
 block_ad_marker:              # 블록 안에 이 요소가 있으면 광고 블록
+  - "[id^='mobilePowerLink']"
   - ".link_ad"
   - ".ad_label"
-  - "[class*='power_link']"
-  - "[class*='ad_area']"
-block_type_by_class:          # 섹션 class 조각 → 블록 종류 이름(앞에서부터 처음 맞는 것)
-  - ["sp_nmap", "플레이스"]
-  - ["sp_place", "플레이스"]
-  - ["sp_local", "플레이스"]
-  - ["sp_power", "광고(파워링크)"]
-  - ["power_link", "광고(파워링크)"]
-  - ["sp_ad", "광고"]
-  - ["sp_nreview", "블로그/리뷰"]
-  - ["sp_blog", "블로그"]
-  - ["sp_cafe", "카페"]
-  - ["sp_influencer", "인플루언서"]
-  - ["sp_keyword", "연관검색어"]
-  - ["sp_nvideo", "동영상"]
-  - ["sp_video", "동영상"]
-  - ["sp_image", "이미지"]
-  - ["sp_nnews", "뉴스"]
-  - ["sp_news", "뉴스"]
-  - ["sp_kin", "지식iN"]
-  - ["sp_nsite", "웹사이트"]
-  - ["sp_web", "웹사이트"]
-  - ["sp_shop", "쇼핑"]
-  - ["sp_nshop", "쇼핑"]
-  - ["sp_intent", "스마트블록"]
-  - ["sp_ugc", "스마트블록"]
-  - ["api_subject_bx", "스마트블록"]
-block_type_by_title:          # 블록 제목 조각 → 종류(class 로 못 정했을 때)
-  - ["파워링크", "광고(파워링크)"]
-  - ["플레이스", "플레이스"]
-  - ["블로그", "블로그"]
-  - ["인플루언서", "인플루언서"]
-  - ["연관검색어", "연관검색어"]
-  - ["함께 많이 찾는", "연관검색어"]
-  - ["카페", "카페"]
-  - ["동영상", "동영상"]
-  - ["뉴스", "뉴스"]
-  - ["지식iN", "지식iN"]
-  - ["이미지", "이미지"]
-block_keyword_item:           # 스마트블록 안의 키워드 칩(이걸로 키워드 후보를 더 모은다)
-  - ".fds-keyword-chip a"
+block_keyword_item:           # 블록 안 키워드 칩(종류가 연관검색어·스마트블록일 때만 읽는다)
   - "[class*='keyword-chip'] a"
   - "[class*='keyword_chip'] a"
-  - ".sp_keyword .keyword a"
-  - ".lst_related_srch li a"
+  - ".fds-keyword-chip a"
   - "a[class*='chip']"
-blog_item_title:              # 블로그 글 제목(블록이 블로그 성격인지 판단에만 씀; 1단계에서 확장)
-  - ".title_link"
-  - ".api_txt_lines.total_tit"
-  - "a[class*='title']"
 
-# 플레이스(검색 화면 안 목록)
-place_section:                # 플레이스 블록 자체(위 block 과 별개로 직접 찾는다)
-  - "section.sp_nmap"
-  - "section[class*='sp_place']"
-  - "section[class*='sp_local']"
-  - "div[class*='place']"
-place_item:                   # 업체 한 곳
-  - "li.place_unit"
-  - "li[class*='place_unit']"
-  - "li[class*='item_place']"
-  - "ul[class*='place'] > li"
-  - "li[class*='item']"
-place_item_name:
-  - ".place_bluelink"
-  - "span.place_bluelink"
-  - ".name"
-  - "strong.tit"
-  - "a[class*='name']"
-  - "strong"
-place_item_ad:                # 항목 안에 있으면 광고 업체
-  - ".ad_marker"
-  - "[class*='ad_marker']"
-  - "span:has-text('광고')"
-  - "[class*='ad']:visible"
-place_more_link:              # '더보기' (플레이스 목록 페이지로 감)
-  - "a:has-text('더보기')"
-  - ".btn_more"
-  - "a[class*='more']"
+# ---------- 플레이스 ----------
+place_root:                   # 플레이스 블록. 여러 개면 제목에 "플레이스"가 든 것을 쓴다(프로그램 안내 제외)
+  - "#place-app-root"
+place_title: ".place_section_header_title"
+place_item: "li"
+place_name_anchor: "a:not(.place_thumb)"     # 항목 안에서 글자가 있고 '더보기'가 아닌 첫 a
+place_name_text: "span"                      # 그 a 안에서 글자가 있는 첫 span 이 업체명
+place_ad_text: "광고"                        # 항목 안 어느 요소든 이 글자만 있으면 광고(네이버는 span.place_blind '광고')
+place_more_link:              # 플레이스 목록 페이지로 가는 '… 더보기'
+  - "#place-app-root a[href*='place/list']"
+  - "#place-app-root a[href*='m.place.naver.com'][href*='list']"
+place_expand_button:          # 블록 안에서 펼치기(있으면 누른다)
+  - "#place-app-root a:has-text('펼쳐서 더보기')"
 
-# 플레이스 목록 페이지(더보기 누른 뒤. m.place.naver.com 등)
-place_list_item:
-  - "li.place_unit"
-  - "li[class*='place_unit']"
-  - "ul > li[class*='item']"
-  - "li[data-id]"
-  - "ul[class*='list'] > li"
-place_list_name:
-  - ".place_bluelink"
-  - "span.place_bluelink"
-  - ".name"
-  - "strong.tit"
-  - "a[class*='name']"
-  - "span[class*='name']"
-  - "strong"
-place_list_ad:
-  - ".ad_marker"
-  - "[class*='ad_marker']"
-  - "span:has-text('광고')"
-place_list_more_button:       # 목록 페이지에서 더 불러오기(있으면 누른다)
-  - "a:has-text('더보기')"
-  - "button:has-text('더보기')"
+# 플레이스 목록 페이지(더보기 누른 뒤, m.place.naver.com/place/list). 같은 규칙(place_name_anchor 등)으로 읽는다.
+# ※ 이 페이지는 스크립트로만 그려져서 클라우드 세션에서는 비어 보인다. PC에서 돌린 pages/*_place.html 로 맞춘다.
+place_list_root:
+  - "#app-root"
+  - "#_list_scroll_container"
+  - "body"
+place_list_item: "li"
+place_list_scroll_times: 4    # 상위 N곳이 안 차면 아래로 스크롤해 더 불러오는 횟수

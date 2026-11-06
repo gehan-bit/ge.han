@@ -39,7 +39,9 @@ competitor_candidates:     # 구글 지도에서 찾은 후보. aliases 중 하�
 
 crawl:
   search_url: "https://m.search.naver.com/search.naver?query={query}"
-  home_url: "https://m.search.naver.com/"          # 자동완성은 여기 검색창에 입력해서 읽는다
+  place_list_url: "https://m.place.naver.com/place/list?query={query}"   # 더보기 링크를 못 찾았을 때 쓰는 목록 페이지
+  render_wait_ms: 2500       # 화면이 다 그려지길 기다리는 시간(리액트 블록이 늦게 뜬다)
+  # 자동완성: 검색창이 쓰는 것과 같은 API. 실패하면 검색 결과 화면의 검색창에 입력해 레이어를 읽는다
   autocomplete_api: "https://ac.search.naver.com/nx/ac?q={query}&st=100&frm=nv&r_format=json&r_enc=UTF-8&r_unicode=0&t_koreng=1&ans=2&run=2&rev=4&q_enc=UTF-8"
   wait_min_sec: 3            # 요청 사이 랜덤 대기(초)
   wait_max_sec: 5

@@ -10,6 +10,7 @@ from typing import Any
 
 from .browser import BlockedError, Browser, Log
 from .config import Config, as_list, normalize_name
+from .dom import BLOCKS_JS, PLACES_JS
 
 
 @dataclass
@@ -20,7 +21,8 @@ class Block:
     css_class: str
     is_ad: bool
     keywords: list[str] = field(default_factory=list)   # 블록 안 키워드 칩
-    item_count: int = 0                                  # 블록 안 링크 수(참고)
+    item_count: int = 0                                  # 블록 안 항목 수
+    names: list[str] = field(default_factory=list)      # 항목 이름(업체명·블로거명 등, 상위 몇 개)
 
 
 @dataclass
@@ -30,6 +32,7 @@ class PlaceItem:
     name: str
     is_ad: bool
     source: str           # 검색화면 / 더보기
+    link: str = ""
 
 
 @dataclass
@@ -84,7 +87,17 @@ class Discoverer:
         stem = re.sub(r"[\\/:*?\"<>|\s]+", "_", kw)
         self.log.write(f"▶ [{kw}]")
 
-        # 1) 자동완성(검색창 입력)
+        # 1) 검색 결과 화면
+        url = self.cfg.crawl["search_url"].format(query=urllib.parse.quote(kw))
+        r.search_url = url
+        self.br.goto(url)
+        self.br.page.wait_for_timeout(int(self.cfg.crawl.get("render_wait_ms", 2500)))
+        self.br.save_page(self.out_dir / "pages", stem)
+        self.collect_related(kw, r)
+        self.collect_blocks(kw, r)
+        self.collect_places_serp(kw, r)
+
+        # 2) 자동완성(API → 화면 레이어)
         try:
             self.collect_autocomplete(kw, r)
         except BlockedError:
@@ -92,18 +105,8 @@ class Discoverer:
         except Exception as e:
             r.notes.append(f"자동완성 실패: {e}")
             self.log.write(f"  ⚠ 자동완성 실패: {e}", stderr=True)
-        self.br.sleep_between()
 
-        # 2) 검색 결과 화면
-        url = self.cfg.crawl["search_url"].format(query=urllib.parse.quote(kw))
-        r.search_url = url
-        self.br.goto(url)
-        self.br.save_page(self.out_dir / "pages", stem)
-        self.collect_related(kw, r)
-        self.collect_blocks(kw, r)
-        self.collect_places_serp(kw, r)
-
-        # 3) 플레이스 더보기
+        # 3) 플레이스 더보기(목록 페이지)
         if self.cfg.crawl.get("place_more", True):
             self.br.sleep_between()
             try:
@@ -125,41 +128,40 @@ class Discoverer:
 
     # ---------- 자동완성 ----------
     def collect_autocomplete(self, kw: str, r: KeywordResult) -> None:
-        home = self.cfg.crawl.get("home_url")
-        if home:
-            self.br.goto(home)
-            box = self.br.first("search_input", context=f"{kw}/자동완성")
-            if box is not None:
-                box.click()
-                box.fill("")
-                box.type(kw, delay=80)
-                self.br.page.wait_for_timeout(1200)
-                items = self.br.all("autocomplete_item", context=f"{kw}/자동완성", required=False)
-                texts = _dedupe([_clean(self.br.text(i)) for i in items])
-                if texts:
-                    r.autocomplete = texts
-                    r.autocomplete_source = "검색창"
-                    return
-                self.log.write("  자동완성 목록을 화면에서 못 읽어 API로 다시 시도")
         api = self.cfg.crawl.get("autocomplete_api")
-        if not api:
-            self.log.miss(f"{kw}/자동완성", "autocomplete_item")
-            return
-        try:
-            resp = self.br.ctx.request.get(api.format(query=urllib.parse.quote(kw)), timeout=10000)
-            data = resp.json()
-            texts: list[str] = []
-            for group in data.get("items", []):
-                for row in group:
-                    if row and isinstance(row, list) and isinstance(row[0], str):
+        if api:
+            try:
+                resp = self.br.ctx.request.get(api.format(query=urllib.parse.quote(kw)), timeout=10000,
+                                               headers={"Referer": "https://m.search.naver.com/"})
+                data = resp.json()
+                texts: list[str] = []
+                for group in data.get("items", []) or []:
+                    for row in group:
+                        if row and isinstance(row, list) and isinstance(row[0], str):
+                            texts.append(row[0])
+                for row in data.get("answer", []) or []:       # 정답형·의도형 제안이 있으면 같이
+                    if isinstance(row, list) and row and isinstance(row[0], str):
                         texts.append(row[0])
-            r.autocomplete = _dedupe(texts)
-            r.autocomplete_source = "API" if r.autocomplete else ""
-            if not r.autocomplete:
-                self.log.miss(f"{kw}/자동완성", "autocomplete_api")
-        except Exception as e:
-            self.log.miss(f"{kw}/자동완성", "autocomplete_item")
-            r.notes.append(f"자동완성 API 실패: {e}")
+                r.autocomplete = _dedupe(texts)
+                if r.autocomplete:
+                    r.autocomplete_source = "자동완성 API"
+                    return
+                self.log.write("  자동완성 API 응답에 항목이 없어 화면 레이어로 다시 시도")
+            except Exception as e:
+                self.log.write(f"  자동완성 API 실패({e}) → 화면 레이어로 다시 시도", stderr=True)
+        # 화면 레이어: 지금 떠 있는 검색 결과 화면의 검색창에 입력한다(검색은 하지 않음)
+        box = self.br.first("search_input", context=f"{kw}/자동완성")
+        if box is None:
+            return
+        box.click()
+        self.br.page.wait_for_timeout(500)
+        box.press("Control+a")
+        box.type(kw, delay=90)
+        self.br.page.wait_for_timeout(1500)
+        items = self.br.all("autocomplete_item", context=f"{kw}/자동완성")
+        r.autocomplete = _dedupe([_clean(self.br.text(i)) for i in items])
+        r.autocomplete_source = "검색창 레이어" if r.autocomplete else ""
+        box.press("Escape")
 
     # ---------- 연관검색어 ----------
     def collect_related(self, kw: str, r: KeywordResult) -> None:
@@ -167,96 +169,65 @@ class Discoverer:
         r.related = _dedupe([_clean(self.br.text(i)) for i in items])
 
     # ---------- 검색화면 블록 ----------
-    def _kind_of(self, css: str, title: str) -> str:
-        for frag, kind in self.S.get("block_type_by_class", []) or []:
-            if frag in css:
-                return kind
-        for frag, kind in self.S.get("block_type_by_title", []) or []:
-            if frag in title:
-                return kind
-        return "기타"
-
     def collect_blocks(self, kw: str, r: KeywordResult) -> None:
-        secs = self.br.all("block", context=f"{kw}/블록")
-        order = 0
-        for sec in secs:
-            try:
-                if not sec.is_visible():
-                    continue
-            except Exception:
-                continue
-            css = (sec.get_attribute("class") or "").strip()
-            title = _clean(self.br.text(self.br.first("block_title", root=sec, required=False)))
-            if not title and not css:
-                continue
-            is_ad = self.br.first("block_ad_marker", root=sec, required=False) is not None
-            kind = self._kind_of(css, title)
-            if is_ad and "광고" not in kind:
-                kind = f"광고({kind})" if kind != "기타" else "광고"
-            chips = self.br.all("block_keyword_item", root=sec, required=False)
-            kws = _dedupe([_clean(self.br.text(c)) for c in chips])
-            try:
-                n_links = sec.locator("a").count()
-            except Exception:
-                n_links = 0
-            order += 1
-            r.blocks.append(Block(order, title or "(제목 없음)", kind, css[:120], is_ad, kws, n_links))
-        if secs and not r.blocks:
-            self.log.miss(f"{kw}/블록", "block_title")
+        res = self.br.page.evaluate(BLOCKS_JS, [
+            as_list(self.S.get("result_container")), as_list(self.S.get("block_skip_tags")),
+            self.S.get("block_rules") or [], as_list(self.S.get("block_ad_marker")), as_list(self.S.get("block_keyword_item")),
+        ])
+        if not res.get("root"):
+            self.log.miss(f"{kw}/블록", "result_container")
+            return
+        for i, b in enumerate(res["blocks"], start=1):
+            r.blocks.append(Block(i, b["title"], b["kind"], b["css"], b["is_ad"], _dedupe(b["keywords"]),
+                                  b["item_count"], b["names"][:10]))
+        if not r.blocks:
+            self.log.miss(f"{kw}/블록", "block_rules")
 
     # ---------- 플레이스(검색 화면) ----------
-    def _read_place_items(self, root, item_key: str, name_key: str, ad_key: str, source: str, ctx: str,
-                          limit: int | None = None) -> list[PlaceItem]:
-        items = self.br.all(item_key, root=root, context=ctx)
+    def _read_places(self, root_key: str, item_key: str, source: str, ctx: str, *, prefer_title: str = "",
+                     limit: int | None = None) -> list[PlaceItem]:
+        res = self.br.page.evaluate(PLACES_JS, [
+            as_list(self.S.get(root_key)), self.S.get("place_title", ".place_section_header_title"),
+            self.S.get(item_key, "li"), self.S.get("place_name_anchor", "a"), self.S.get("place_name_text", "span"),
+            self.S.get("place_ad_text", "광고"), prefer_title,
+        ])
+        if not res.get("root"):
+            self.log.miss(ctx, root_key)
+            return []
         out: list[PlaceItem] = []
         seen: set[str] = set()
         rank = 0
-        for it in items:
-            try:
-                if not it.is_visible():
-                    continue
-            except Exception:
-                continue
-            name = _clean(self.br.text(self.br.first(name_key, root=it, required=False)))
-            if not name:
-                continue
-            key = normalize_name(name)
-            if key in seen:
+        for it in res["items"]:
+            key = normalize_name(it["name"])
+            if not key or key in seen:
                 continue
             seen.add(key)
-            is_ad = self.br.first(ad_key, root=it, required=False) is not None
-            if not is_ad:
+            if not it["is_ad"]:
                 rank += 1
-            out.append(PlaceItem(len(out) + 1, None if is_ad else rank, name, is_ad, source))
+            out.append(PlaceItem(len(out) + 1, None if it["is_ad"] else rank, it["name"], it["is_ad"], source, it["link"]))
             if limit and rank >= limit:
                 break
-        if items and not out:
-            self.log.miss(ctx, name_key)
+        if not out:
+            self.log.miss(ctx, item_key)
         return out
 
     def collect_places_serp(self, kw: str, r: KeywordResult) -> None:
-        sec = self.br.first("place_section", context=f"{kw}/플레이스", required=False)
-        if sec is None:
-            # 블록 목록에서 플레이스 종류를 찾아 본다
-            secs = self.br.all("block", required=False)
-            for s in secs:
-                css = s.get_attribute("class") or ""
-                title = _clean(self.br.text(self.br.first("block_title", root=s, required=False)))
-                if self._kind_of(css, title) == "플레이스":
-                    sec = s
-                    break
-        if sec is None:
-            self.log.miss(f"{kw}/플레이스", "place_section")
-            return
-        r.places_serp = self._read_place_items(sec, "place_item", "place_item_name", "place_item_ad",
-                                               "검색화면", f"{kw}/플레이스")
-        more = self.br.first("place_more_link", root=sec, context=f"{kw}/플레이스 더보기", required=False)
+        ctx = f"{kw}/플레이스"
+        btn = self.br.first("place_expand_button", required=False)
+        if btn is not None:
+            try:
+                btn.click()
+                self.br.page.wait_for_timeout(1200)
+            except Exception:
+                pass
+        r.places_serp = self._read_places("place_root", "place_item", "검색화면", ctx, prefer_title="플레이스")
+        more = self.br.first("place_more_link", context=f"{kw}/플레이스 더보기", required=False)
         if more is not None:
             href = more.get_attribute("href") or ""
             if href and not href.startswith("javascript"):
                 r.place_more_url = urllib.parse.urljoin(self.br.page.url, href)
 
-    # ---------- 플레이스 더보기 ----------
+    # ---------- 플레이스 더보기(목록 페이지) ----------
     def collect_places_more(self, kw: str, r: KeywordResult, stem: str) -> None:
         top_n = int(self.cfg.crawl.get("place_top_n", 10))
         url = r.place_more_url
@@ -269,24 +240,23 @@ class Discoverer:
             r.place_more_url = url
             self.log.write("  더보기 링크를 못 찾아 기본 목록 URL 사용")
         self.br.goto(url)
-        self.br.save_page(self.out_dir / "pages", f"{stem}_place")
+        self.br.page.wait_for_timeout(int(self.cfg.crawl.get("render_wait_ms", 2500)))
         ctx = f"{kw}/플레이스 더보기"
-        places = self._read_place_items(self.br.page, "place_list_item", "place_list_name", "place_list_ad",
-                                        "더보기", ctx, limit=top_n)
+        places = self._read_places("place_list_root", "place_list_item", "더보기", ctx, limit=top_n)
         tries = 0
-        while len([p for p in places if not p.is_ad]) < top_n and tries < 3:
-            btn = self.br.first("place_list_more_button", required=False)
-            if btn is None:
-                break
-            try:
-                btn.click()
-                self.br.page.wait_for_timeout(1500)
-                self.br.check_blocked()
-            except Exception:
-                break
+        while len([p for p in places if not p.is_ad]) < top_n and tries < int(self.S.get("place_list_scroll_times", 4)):
+            self.br.page.mouse.wheel(0, 3000)
+            self.br.page.wait_for_timeout(1500)
+            self.br.check_blocked()
             tries += 1
-            places = self._read_place_items(self.br.page, "place_list_item", "place_list_name", "place_list_ad",
-                                            "더보기", ctx, limit=top_n)
+            more = self._read_places("place_list_root", "place_list_item", "더보기", ctx, limit=top_n)
+            if len(more) <= len(places):
+                break
+            places = more
+        self.br.save_page(self.out_dir / "pages", f"{stem}_place")
+        if not places:
+            r.notes.append("플레이스 목록 페이지에서 업체를 읽지 못해 검색화면 목록만 사용")
+            self.log.write("  ⚠ 플레이스 목록 페이지에서 업체를 못 읽음 → 검색화면 목록만 사용 (pages/*_place.png 확인)", stderr=True)
         r.places_more = places
 
 
@@ -314,7 +284,8 @@ def keyword_candidates(results: list[KeywordResult], seeds: list[str]) -> list[d
         for b in r.blocks:
             if b.kind == "연관검색어":      # 위에서 연관검색어로 이미 넣었다
                 continue
+            where = b.kind if b.title in (b.kind, "파워링크") else f"{b.kind}:{b.title}"
             for kw in b.keywords:
-                add(kw, r.seed, f"스마트블록:{b.title}")
+                add(kw, r.seed, where)
     rows = sorted(found.values(), key=lambda d: (-len(d["seeds"]), -d["count"], d["keyword"]))
     return rows

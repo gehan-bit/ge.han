@@ -53,9 +53,11 @@ class Browser:
 
         self._pw = sync_playwright().start()
         exe = os.environ.get("NAVER_ORGANIC_CHROME") or os.environ.get("NAVER_BLOG_CHROME")
+        proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")   # 회사망·클라우드 프록시가 있을 때만
         self.browser = self._pw.chromium.launch(
             headless=self.headless,
             executable_path=exe or None,
+            proxy={"server": proxy} if proxy else None,
             args=["--disable-blink-features=AutomationControlled"],
         )
         self.new_context()

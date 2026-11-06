@@ -166,7 +166,24 @@ drafts/          완성된 글(post.json + 가공 사진)을 PC로 넘기기 위
 - `config/organic_selectors.yaml` — 네이버 화면 셀렉터. **네이버 화면이 바뀌면 이 파일만 고칩니다.**
   각 항목은 후보 목록이고 위에서부터 차례로 시도합니다. 못 찾으면 그 칸은 비우고 `log.txt` 와 엑셀 "실행 로그" 시트에
   `셀렉터 없음: <키>` 로 남깁니다. `output/organic/<날짜>/pages/` 에 키워드별 HTML·스크린샷이 저장되니 그걸 열어
-  class 를 확인하고 후보 맨 앞에 추가하면 됩니다.
+  확인하고 후보 맨 앞에 추가하면 됩니다.
+
+### 네이버 모바일 화면 구조 (2026-11 실제 화면으로 확인)
+
+네이버 모바일은 class 가 해시(예: `XCvzh`)라 자주 바뀝니다. 그래서 id·data 속성·링크 패턴처럼 안정적인 것만 씁니다.
+
+| 블록 | 찾는 기준 | 비고 |
+| --- | --- | --- |
+| 파워링크(광고) | `#ct` 의 첫 `section` 안 `[id^=mobilePowerLink]` | 업체명 `span.tit`, 광고주 등록 키워드 `.etc_item` → 키워드 후보 출처 "광고(파워링크)" |
+| 플레이스 | `#place-app-root` (제목 `.place_section_header_title`) | 키워드에 따라 "프로그램 안내"(예약 상품) 블록이 따로 더 뜸. 업체명 = 항목 안 첫 `a`(썸네일·더보기 제외)의 첫 `span`, 광고 = 항목 안 "광고" 글자 |
+| 관련질문(AI)·브랜드 콘텐츠·이미지·클립 등 | `div[id^=fdr-]` 의 `data-meta-ssuid` 값(fuq/review/image/clip…) | 제목은 `h2` |
+| 글 피드(블로그·카페) | `.spw_fsolid` 안 `.api_subject_bx` 하나가 글 하나 | 제목 없는 글 목록. 블로거명은 첫 링크 |
+
+- **자동완성**은 검색창이 쓰는 것과 같은 API(`ac.search.naver.com`)로 읽습니다(검색창에 입력하는 방식과 결과가 같고 요청이 적음).
+  API가 안 되면 검색 결과 화면의 검색창에 입력해 `#sb-ac-recomm-wrap li` 를 읽습니다.
+- **연관검색어** 블록은 현재 모바일 통합검색에 없습니다(자동완성·관련질문·스마트블록으로 대체). 항상 빈칸 + 로그로 남고, 생기면 `related_keyword` 에 셀렉터를 추가하면 됩니다.
+- **플레이스 더보기**(`m.place.naver.com/place/list?query=…`)는 스크립트로만 그려지는 페이지라 클라우드 세션에서는 비어 보입니다.
+  PC에서 돌리면 그려지며, 첫 실행 뒤 `pages/<키워드>_place.html` 을 보고 `place_list_*` 셀렉터를 맞춥니다. 비어 있으면 검색화면 목록(5~10곳)만 씁니다.
 
 ## 0단계 실행
 
@@ -202,10 +219,9 @@ python -m naver_organic discover               # 씨앗 전체
 python -m pytest -q tests
 ```
 
-네이버에 접속하지 않고 파이프라인만 돌려 보려면 모의 화면을 씁니다:
+네이버에 접속하지 않고 파이프라인만 돌려 보려면 모의 화면(실제 구조를 흉내 낸 `tests/mock/organic`)을 씁니다:
 
 ```bash
-python -m naver_organic discover --test --headless --fast \
-  --search-url "file://$PWD/tests/mock/organic/{query}.html" \
-  --home-url "file://$PWD/tests/mock/organic/home.html"
+python -m naver_organic discover --test --headless --fast --ac-ui \
+  --search-url "file://$PWD/tests/mock/organic/{query}.html"
 ```

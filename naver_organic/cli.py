@@ -36,12 +36,12 @@ def cmd_discover(a) -> int:
     S = load_selectors(a.selectors)
     if a.search_url:
         cfg.crawl["search_url"] = a.search_url
-    if a.home_url is not None:
-        cfg.crawl["home_url"] = a.home_url or None
     if a.place_list_url:
         cfg.crawl["place_list_url"] = a.place_list_url
     if a.no_place_more:
         cfg.crawl["place_more"] = False
+    if a.ac_ui:
+        cfg.crawl["autocomplete_api"] = None       # 화면 레이어 경로만 시험
     if a.fast:
         cfg.crawl["wait_min_sec"] = cfg.crawl["wait_max_sec"] = 0.2
 
@@ -108,9 +108,9 @@ def main(argv=None) -> int:
     p.add_argument("--no-place-more", action="store_true")
     p.add_argument("--out", help="출력 폴더(기본 output/organic)")
     p.add_argument("--search-url", help=argparse.SUPPRESS)        # 테스트용(모의 화면)
-    p.add_argument("--home-url", help=argparse.SUPPRESS)
     p.add_argument("--place-list-url", help=argparse.SUPPRESS)
     p.add_argument("--fast", action="store_true", help=argparse.SUPPRESS)
+    p.add_argument("--ac-ui", action="store_true", help=argparse.SUPPRESS)
     p.set_defaults(fn=cmd_discover)
 
     p = sub.add_parser("show-config")
